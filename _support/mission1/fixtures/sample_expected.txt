@@ -1,0 +1,3 @@
+[TEST] HELLO_C
+[INVALID]
+Recovered: 1 | Rejected: 1

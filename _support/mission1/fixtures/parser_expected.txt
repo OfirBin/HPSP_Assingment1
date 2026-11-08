@@ -1,0 +1,5 @@
+[TEST] HELLO_C
+[TEST] HELLO_C
+[INVALID]
+[INVALID]
+PASS: Part B checksum and parser tests
