@@ -1,0 +1,12 @@
+# Personal evidence files created by ./operation_b7
+mission1/data/transmissions.txt
+mission2/data/mission2_data.c
+mission3/data/mission3_archive.b7
+mission4/data/mission4_controller.b7
+mission5/data/mission5_emergency.b7
+mission6_Bonus/data/mission6_packets.txt
+mission6_Bonus/data/mission6_meetings.bin
+
+# Object files you compile, but not the course test files
+*.o
+!_support/**/*.o
