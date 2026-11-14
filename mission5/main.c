@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
     (void)argv;
     (void)options;
 
-    /* TODO 1: call parse_launch_options with argc, argv, and options. */
+    options_ready = parse_launch_options(argc, argv, &options);
     if (!options_ready) {
         fputs("Invalid emergency launch options.\n", stderr);
         goto cleanup;
@@ -29,13 +29,25 @@ int main(int argc, char *argv[])
         goto cleanup;
     }
 
-    /* TODO 2: find the first matching pending admin authorization. */
+    authorization = find_authorization(
+        evidence.records,
+        evidence.record_count,
+        evidence.request_id,
+        evidence.unit_id,
+        M5_ADMIN_CLEARANCE
+    );
     if (authorization == NULL) {
         fputs("No usable emergency authorization was found.\n", stderr);
         goto cleanup;
     }
 
-    /* TODO 3: initialize request from options, authorization, and steps. */
+    request_ready = emergency_request_init(
+        &request,
+        &options,
+        authorization,
+        evidence.steps,
+        evidence.step_count
+    );
     if (!request_ready) {
         fputs("Could not stage the emergency request.\n", stderr);
         goto cleanup;
@@ -46,13 +58,13 @@ int main(int argc, char *argv[])
         goto cleanup;
     }
 
-    /* TODO 4: validate the complete request. */
+    request_valid = validate_emergency_request(&request);
     if (!request_valid) {
         fputs("Emergency request validation failed.\n", stderr);
         goto cleanup;
     }
 
-    /* TODO 5: submit the validated request to the local simulator. */
+    submitted = mission5_submit_request(&evidence, &request);
     if (!submitted) {
         fputs("Emergency control rejected the request.\n", stderr);
         goto cleanup;
