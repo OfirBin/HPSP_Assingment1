@@ -118,7 +118,23 @@ int main(void)
     (void)key;
     (void)result;
     /* TODO 2: format numeric_value as 16 bits. */
+    if (!format_binary(result.numeric_value, 16, result.binary,
+                       sizeof(result.binary))) {
+        goto cleanup;
+    }
     /* TODO 3: decode channels 1, 2, and 3 into result.fragments. */
+     for (size_t i = 0; i < 3; i++) {
+        if (!decode_channel(packets, packet_count, (uint8_t)(i + 1), key,
+                            result.fragments[i], sizeof(result.fragments[i]))) {
+            goto cleanup;
+        }
+    }
+
+    meetings = fopen(MEETING_PATH, "rb");
+    if (meetings == NULL) {
+        fputs("Could not open Mission 6 meeting evidence.\n", stderr);
+        goto cleanup;
+    }
 
     meetings = fopen(MEETING_PATH, "rb");
     if (meetings == NULL) {
@@ -126,8 +142,14 @@ int main(void)
         goto cleanup;
     }
     /* TODO 4: find the one confirmed meeting, then close the file. */
+    if (!find_confirmed_meeting(meetings, &result.meeting)) {
+        goto cleanup;
+    }
     result.raw_signed = (uint8_t)result.meeting.minute_adjust;
     /* TODO 2: decode the meeting's raw_signed correction as 8 bits. */
+    if (!decode_twos_complement(result.raw_signed, 8, &result.signed_value)) {
+        goto cleanup;
+    }
     if (fclose(meetings) != 0) {
         meetings = NULL;
         goto cleanup;
@@ -135,7 +157,13 @@ int main(void)
     meetings = NULL;
 
     /* TODO 5: resolve the meeting's location from channel 0xE. */
+    if (!resolve_location(packets, packet_count, key,
+                          result.meeting.location_code,
+                          result.location, sizeof(result.location))) {
+        goto cleanup;
+    }
     /* TODO 6: submit the fully computed result with mission6_report_success. */
+    success = mission6_report_success(PACKET_PATH, MEETING_PATH, &result);
     if (!success) {
         fputs("Mission 6 evidence could not be fully verified.\n", stderr);
         goto cleanup;
